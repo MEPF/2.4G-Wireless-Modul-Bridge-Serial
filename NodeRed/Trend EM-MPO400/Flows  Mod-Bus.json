@@ -1,0 +1,233 @@
+[
+    {
+        "id": "b6dff5fb.997a78",
+        "type": "function",
+        "z": "bf41689d.721cc8",
+        "name": "ModBus ID: 2",
+        "func": "// -----------------------------------------------------------------------------------\n\nvar ID_ModBus = 2; // ID - Network\n\n// -----------------------------------------------------------------------------------\n\n// Get Pack 1 Register: ( 7680 > 7681 )\nif  (msg.topic === \"ReadPack_1\") {\n    msg.payload = { value: msg.payload, 'fc': 3, 'unitid': ID_ModBus, 'address': 7680 , 'quantity': 12 };\n    return msg;\n}\n// Get Pack 2 Register: ( 7688 > 7696 )\nelse if (msg.topic === \"ReadPack_2\") {\n    msg.payload = { value: msg.payload, 'fc': 3, 'unitid': ID_ModBus, 'address': 7688 , 'quantity': 10 };\n    return msg;\n}\n// Get Pack 3 Register: ( 7701 > 7708 )\nelse if (msg.topic === \"ReadPack_3\") {\n    msg.payload = { value: msg.payload, 'fc': 3, 'unitid': ID_ModBus, 'address': 7701 , 'quantity': 26 };\n    return msg;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 520,
+        "y": 55,
+        "wires": [
+            [
+                "4602ee13.8c662"
+            ]
+        ]
+    },
+    {
+        "id": "3eb31ec4.68d182",
+        "type": "function",
+        "z": "bf41689d.721cc8",
+        "name": "APP ID BV0011",
+        "func": "// -----------------------------------------------------------------------------------\n\nvar ID_APP = \"BV0011\"; // ID - APP\n\n// ----------------------------------------------------------------------------------- ReadPack_1\nif (msg.topic === \"ReadPack_1\" & msg.payload.length !== 0) {\n\n    let totalActiveEnergyImport        = msg.payload.buffer.readUIntBE(0,4);\n    let totalReactiveEnergyImport      = msg.payload.buffer.readUIntBE(8,4);\n    let totalApparentEnergyImport      = msg.payload.buffer.readUIntBE(16,4);\n\n     \n    return [\n        {\n            payload: {\n                totalActiveEnergyImport:        ID_APP + \"0001_Total-Active-Energy-Import_\"     + totalActiveEnergyImport       + \"_kWh\"    + \"_NUMBER\",\n                totalReactiveEnergyImport:      ID_APP + \"0002_Total-Reactive-Energy-Import_\"   + totalReactiveEnergyImport     + \"_kvarh\"  + \"_NUMBER\",\n                totalApparentEnergyImport:      ID_APP + \"0003_Total-Apparent-Energy-Import_\"   + totalApparentEnergyImport     + \"_kVAh\"   + \"_NUMBER\"  \n            },\n            topic: msg.topic = \"ReadPack_2\"\n            }\n        ];\n}\n\n// ----------------------------------------------------------------------------------- ReadPack_2\nelse if (msg.topic === \"ReadPack_2\" & msg.payload.length !== 0) {\n    \n    let I1      = msg.payload.buffer.readUIntBE(0,2);\n    let I2      = msg.payload.buffer.readUIntBE(2,2);\n    let I3      = msg.payload.buffer.readUIntBE(4,2);\n    let U1N     = msg.payload.buffer.readUIntBE(6,2);\n    let U2N     = msg.payload.buffer.readUIntBE(8,2);\n    let U3N     = msg.payload.buffer.readUIntBE(10,2);\n    let U12     = msg.payload.buffer.readUIntBE(12,2);\n    let U23     = msg.payload.buffer.readUIntBE(14,2);\n    let U31     = msg.payload.buffer.readUIntBE(16,2);\n\n    return [\n        {\n            payload: {\n                I1:         ID_APP + \"0004_I1-phase-1-current_\" + I1/10     + \"_A\"    + \"_NUMBER\",\n                I2:         ID_APP + \"0005_I2-phase-2-current_\" + I2/10     + \"_A\"    + \"_NUMBER\",\n                I3:         ID_APP + \"0006_I3-phase-3-current_\" + I3/10     + \"_A\"    + \"_NUMBER\",\n                U1N:        ID_APP + \"0007_Voltage-L1–N_\"       + U1N/10    + \"_V\"    + \"_NUMBER\",\n                U2N:        ID_APP + \"0008_Voltage-L2–N_\"       + U2N/10    + \"_V\"    + \"_NUMBER\",\n                U3N:        ID_APP + \"0009_Voltage-L3–N_\"       + U3N/10    + \"_V\"    + \"_NUMBER\",\n                U12:        ID_APP + \"0010_Voltage-L1–L2_\"      + U12/10    + \"_V\"    + \"_NUMBER\",\n                U23:        ID_APP + \"0011_Voltage-L2–L3_\"      + U23/10    + \"_V\"    + \"_NUMBER\",\n                U31:        ID_APP + \"0012_Voltage L3–L1_\"      + U31/10    + \"_V\"    + \"_NUMBER\"\n            },\n            topic: msg.topic = \"ReadPack_3\"\n            }\n        ];  \n}\n\n// ----------------------------------------------------------------------------------- ReadPack_3\nelse if (msg.topic === \"ReadPack_3\" & msg.payload.length !== 0) {\n    \n    let PFCosf          = msg.payload.buffer.readUIntBE(0,2);\n    let ActPowerL1      = msg.payload.buffer.readUIntBE(2,2);\n    let ActPowerL2      = msg.payload.buffer.readUIntBE(4,2);\n    let ActPowerL3      = msg.payload.buffer.readUIntBE(6,2);\n    let ActPowerTot     = msg.payload.buffer.readUIntBE(8,2);\n    let AppPowerL1      = msg.payload.buffer.readUIntBE(10,2);\n    let AppPowerL2      = msg.payload.buffer.readUIntBE(12,2);\n    let AppPowerL3      = msg.payload.buffer.readUIntBE(14,2);\n    let AppPowerTot     = msg.payload.buffer.readUIntBE(16,2);\n    let RactPowerL1     = msg.payload.buffer.readUIntBE(18,2);\n    let RactPowerL2     = msg.payload.buffer.readUIntBE(20,2);\n    let RactPowerL3     = msg.payload.buffer.readUIntBE(22,2);\n    let RactPowerTot    = msg.payload.buffer.readUIntBE(24,2);\n\n\n    return [\n        {\n            payload: {\n                ActPowerL1:         ID_APP + \"0014_Active-Power-Phase-1_\"   + ActPowerL1/10     + \"_kW\"     + \"_NUMBER\",\n                ActPowerL2:         ID_APP + \"0015_Active-Power-Phase-2_\"   + ActPowerL2/10     + \"_kW\"     + \"_NUMBER\",\n                ActPowerL3:         ID_APP + \"0016_Active-Power-Phase-3_\"   + ActPowerL3/10     + \"_kW\"     + \"_NUMBER\",\n                ActPowerTot:        ID_APP + \"0017_Active-Power-Total_\"   \t+ ActPowerTot/10    + \"_kW\"     + \"_NUMBER\",\n                AppPowerL1:         ID_APP + \"0018_Apparet-Power-Phase-1_\"  + AppPowerL1/10     + \"_kVA\"    + \"_NUMBER\",\n                AppPowerL2:         ID_APP + \"0019_Apparet-Power-Phase-2_\"  + AppPowerL2/10     + \"_kVA\"    + \"_NUMBER\",\n                AppPowerL3:         ID_APP + \"0020_Apparet-Power-Phase-3_\"  + AppPowerL3/10     + \"_kVA\"    + \"_NUMBER\",\n                AppPowerTot:        ID_APP + \"0021_Active-Power-Total_\"   \t+ AppPowerTot/10    + \"_kVA\"    + \"_NUMBER\",\n                RactPowerL1:        ID_APP + \"0022_Reactive-Power-Phase-1_\" + RactPowerL1/10    + \"_kvar\"   + \"_NUMBER\",\n                RactPowerL2:        ID_APP + \"0023_Reactive-Power-Phase-2_\" + RactPowerL2/10    + \"_kvar\"   + \"_NUMBER\",\n                RactPowerL3:        ID_APP + \"0024_Reactive-Power-Phase-3_\" + RactPowerL3/10    + \"_kvar\"   + \"_NUMBER\",\n                RactPowerTot:       ID_APP + \"0025_Active-Power-Total_\"   \t+ RactPowerTot/10   + \"_kvar\"   + \"_NUMBER\",\n                errorconnection:    ID_APP + \"9999_CommunicationStatus_\"    + 1                 + \"_STATUS\" + \"_NSTATE\"\n            },\n            topic: msg.topic = \"Last pack read.\"\n        }\n    ];\n}\n\n// ----------------------------------------------------------------------------------- Error Connection\nelse\n{\n    return [ \n        {\n            payload: {\n            errorconnection: ID_APP + \"9999_CommunicationStatus_\" + 0 + \"_STATUS\" + \"_NSTATE\"\n            },\n            topic: msg.topic = \"Error!\"\n        }\n    ];\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 520,
+        "y": 110,
+        "wires": [
+            [
+                "71d8e3f3.f6c0fc",
+                "b6dff5fb.997a78"
+            ]
+        ]
+    },
+    {
+        "id": "71d8e3f3.f6c0fc",
+        "type": "split",
+        "z": "bf41689d.721cc8",
+        "name": "Splite Pack",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 875,
+        "y": 110,
+        "wires": [
+            [
+                "42b634eb.958fac"
+            ]
+        ]
+    },
+    {
+        "id": "4602ee13.8c662",
+        "type": "modbus-flex-getter",
+        "z": "bf41689d.721cc8",
+        "name": "Trend EM-MPO/400",
+        "showStatusActivities": false,
+        "showErrors": false,
+        "logIOActivities": false,
+        "server": "5a8d8c3d.67c2e4",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": true,
+        "keepMsgProperties": false,
+        "x": 845,
+        "y": 55,
+        "wires": [
+            [],
+            [
+                "3eb31ec4.68d182"
+            ]
+        ]
+    },
+    {
+        "id": "42b634eb.958fac",
+        "type": "function",
+        "z": "bf41689d.721cc8",
+        "name": "Formate - MQTT",
+        "func": "let date = new Date();\n\n//=======================================\n\nlet data \t\t= msg.payload.split(\"_\");\n\nlet id \t\t\t= data[0];              // ID parametru\nlet name \t\t= data[1];             \t// Denumire parametru\nlet value \t\t= data[2];              // Valoare parametru\nlet unit \t \t= data[3];             \t// Unitate de masura parametru\nlet dataType \t= data[4];            \t// Datatype parametru\n\n//=======================================\n\nvar newmsg = \n    { \n        payload: \n            {\n                readedDate      : date.toUTCString(),\n                Id              : id,\n                Value           : value,\n                Name            : name,\n                Datatype        : dataType,\n                Measureunit     : unit,\n                ParamstoreType  : \"EVERY_VALUE\",\n                StoreCountItems : 0,\n                isENEF: 1\n            },\n        topic : \"READER/\" + id\n        };\n        \nreturn newmsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1145,
+        "y": 110,
+        "wires": [
+            [
+                "743424e1.8dc47c",
+                "7b48c49c.1a56cc"
+            ]
+        ]
+    },
+    {
+        "id": "743424e1.8dc47c",
+        "type": "debug",
+        "z": "bf41689d.721cc8",
+        "name": "Debug",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "x": 1440,
+        "y": 110,
+        "wires": []
+    },
+    {
+        "id": "22af7a5c.848b86",
+        "type": "comment",
+        "z": "bf41689d.721cc8",
+        "name": "TG PT 2000",
+        "info": "EMIC  10.47.209.205",
+        "x": 285,
+        "y": 90,
+        "wires": []
+    },
+    {
+        "id": "b3933a6f.7ae3a8",
+        "type": "delay",
+        "z": "bf41689d.721cc8",
+        "name": "Delay 0s",
+        "pauseType": "delay",
+        "timeout": "100",
+        "timeoutUnits": "milliseconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 275,
+        "y": 55,
+        "wires": [
+            [
+                "b6dff5fb.997a78"
+            ]
+        ]
+    },
+    {
+        "id": "e9bf06f7.d1ac28",
+        "type": "inject",
+        "z": "bf41689d.721cc8",
+        "name": "R 5Min",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "300",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "ReadPack_1",
+        "x": 90,
+        "y": 250,
+        "wires": [
+            [
+                "b3933a6f.7ae3a8",
+                "a41a7270.ec5eb",
+                "e83a10b.a2d47f",
+                "dc745f37.d8701"
+            ]
+        ]
+    },
+    {
+        "id": "7b48c49c.1a56cc",
+        "type": "mqtt out",
+        "z": "bf41689d.721cc8",
+        "name": "Publisher",
+        "topic": "",
+        "qos": "0",
+        "retain": "false",
+        "broker": "dc47eb5d.374c48",
+        "x": 1455,
+        "y": 850,
+        "wires": []
+    },
+    {
+        "id": "5a8d8c3d.67c2e4",
+        "type": "modbus-client",
+        "name": "VOR",
+        "clienttype": "serial",
+        "bufferCommands": true,
+        "stateLogEnabled": false,
+        "queueLogEnabled": false,
+        "tcpHost": "127.0.0.1",
+        "tcpPort": "502",
+        "tcpType": "DEFAULT",
+        "serialPort": "COM4",
+        "serialType": "RTU-BUFFERD",
+        "serialBaudrate": "19200",
+        "serialDatabits": "8",
+        "serialStopbits": "1",
+        "serialParity": "none",
+        "serialConnectionDelay": "100",
+        "unit_id": "0",
+        "commandDelay": "100",
+        "clientTimeout": "1000",
+        "reconnectOnTimeout": true,
+        "reconnectTimeout": "2000",
+        "parallelUnitIdsAllowed": false
+    },
+    {
+        "id": "dc47eb5d.374c48",
+        "type": "mqtt-broker",
+        "name": "WebSockets Server",
+        "broker": "ws://rbd-app05.eu.autoliv.int:8080",
+        "port": "8080",
+        "clientid": "",
+        "usetls": false,
+        "compatmode": false,
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    }
+]

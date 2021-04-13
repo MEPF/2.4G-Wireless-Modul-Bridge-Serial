@@ -1,0 +1,299 @@
+[
+    {
+        "id": "181fc47.135b93c",
+        "type": "tab",
+        "label": "Contor Apa - PARTIER",
+        "disabled": true,
+        "info": "Temporar -Desabled - > 03.12.2020"
+    },
+    {
+        "id": "d1c11383.46f06",
+        "type": "inject",
+        "z": "181fc47.135b93c",
+        "name": "Read ID 1 - 60s",
+        "repeat": "60",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "",
+        "topic": "getDevice",
+        "payload": "{\"address\": 1}",
+        "payloadType": "json",
+        "x": 120,
+        "y": 190,
+        "wires": [
+            [
+                "e2de2f59.7775b"
+            ]
+        ]
+    },
+    {
+        "id": "e2de2f59.7775b",
+        "type": "mbus-controller",
+        "z": "181fc47.135b93c",
+        "name": "",
+        "client": "9fb23223.fa3e9",
+        "x": 365,
+        "y": 190,
+        "wires": [
+            [
+                "7a71ca93.636e24",
+                "a0e11fbc.3c391"
+            ]
+        ]
+    },
+    {
+        "id": "7a71ca93.636e24",
+        "type": "debug",
+        "z": "181fc47.135b93c",
+        "name": "",
+        "active": false,
+        "console": false,
+        "complete": "false",
+        "x": 560,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "accb3669.1c7498",
+        "type": "mbus-out",
+        "z": "181fc47.135b93c",
+        "name": "Itron - Cyble MBus V1.4",
+        "client": "9fb23223.fa3e9",
+        "x": 355,
+        "y": 140,
+        "wires": [
+            [
+                "7a71ca93.636e24"
+            ]
+        ]
+    },
+    {
+        "id": "f163a24f.c107e",
+        "type": "inject",
+        "z": "181fc47.135b93c",
+        "name": "setDevices",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "topic": "setDevices",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 105,
+        "wires": [
+            [
+                "e5db5771.020018"
+            ]
+        ]
+    },
+    {
+        "id": "e5db5771.020018",
+        "type": "function",
+        "z": "181fc47.135b93c",
+        "name": "devices",
+        "func": "var devices = [\"1\"];\n\nmsg.payload = devices;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 150,
+        "y": 145,
+        "wires": [
+            [
+                "e2de2f59.7775b"
+            ]
+        ]
+    },
+    {
+        "id": "a0e11fbc.3c391",
+        "type": "function",
+        "z": "181fc47.135b93c",
+        "name": "UPT210_1",
+        "func": "var Id = \"010011\";\n\nlet InstantaneousValue = msg.payload.DataRecord[4].Value\n\nreturn [\n    {\n        payload: {\n        InstantaneousValue:Id + \"0000_Volume_\" + InstantaneousValue + \"_1e-2 m^3\"\n       },\n       topic: msg.topic\n    }\n    ];",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 575,
+        "y": 190,
+        "wires": [
+            [
+                "324eb9d6.6d8eb6",
+                "efa59d95.5ac05"
+            ]
+        ]
+    },
+    {
+        "id": "324eb9d6.6d8eb6",
+        "type": "debug",
+        "z": "181fc47.135b93c",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "x": 760,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "555cac3f.8ecc44",
+        "type": "function",
+        "z": "181fc47.135b93c",
+        "name": "FC - MQTT + BackUP",
+        "func": "var selectday = \"1\"; // Stergeți datele -- Selecteaza ziua.\nvar selecthour = \"00:00\"; // Stergeți datele -- Selecteaza ora.\n\nvar date = new Date();\n\nvar monthday = date.getDate();\nvar get_H_M = date.getHours() + \":\" + date.getMinutes();\n\nvar data = msg.payload.split(\"_\");\nvar id = data[0]; // ID parametru\nvar name = data[1]; // Denumire parametru\nvar value = data[2]; // Valoare parametru\nvar unit = data[3]; // Unitate de masura parametru\n\nif (selectday == monthday && get_H_M == selecthour)\n{\n    var delmsg = \n    { \n        payload: \n        {\n            ToDo : \"Delete file\"\n        },\n      topic : \"Task\",\n    };\n    \n    return [ delmsg, null ];\n}\n\nelse \n{\n    var newmsg = \n        { \n            payload: \n            {\n                readedDate : date.toUTCString(),\n                Id : id,\n                Value : value,\n                Name : name,\n                Datatype : \"NUMBER\",\n                Measureunit : unit,\n                ParamstoreType : \"EVERY_VALUE\",\n                StoreCountItems : 0\n            },\n        topic : \"READER/\" + id,\n        };\n    return [ null, newmsg ];\n}",
+        "outputs": 2,
+        "noerr": 0,
+        "x": 980,
+        "y": 190,
+        "wires": [
+            [
+                "805f079b.fbd448"
+            ],
+            [
+                "df32ec3c.0f73d",
+                "429ad9b5.ad7228",
+                "864de838.44d8c8"
+            ]
+        ]
+    },
+    {
+        "id": "18bd9500.46a77b",
+        "type": "inject",
+        "z": "181fc47.135b93c",
+        "name": "Check Date 30s",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1000,
+        "y": 140,
+        "wires": [
+            [
+                "555cac3f.8ecc44"
+            ]
+        ]
+    },
+    {
+        "id": "805f079b.fbd448",
+        "type": "file",
+        "z": "181fc47.135b93c",
+        "name": "Cleaning Date",
+        "filename": "C:\\Users\\Administrator\\.node-red\\BackUP_Valori\\M-Bus_Itron_1_Data.csv",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "delete",
+        "x": 1220,
+        "y": 95,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "429ad9b5.ad7228",
+        "type": "mqtt out",
+        "z": "181fc47.135b93c",
+        "name": "MQTT Publish",
+        "topic": "",
+        "qos": "0",
+        "retain": "false",
+        "broker": "398df9e.4634a06",
+        "x": 1220,
+        "y": 135,
+        "wires": []
+    },
+    {
+        "id": "df32ec3c.0f73d",
+        "type": "file",
+        "z": "181fc47.135b93c",
+        "name": "BackUP Date",
+        "filename": "C:\\Users\\Administrator\\.node-red\\BackUP_Valori\\Bus_Itron_1_Data.csv",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "false",
+        "x": 1220,
+        "y": 185,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "864de838.44d8c8",
+        "type": "debug",
+        "z": "181fc47.135b93c",
+        "name": "Debug",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "x": 1190,
+        "y": 225,
+        "wires": []
+    },
+    {
+        "id": "efa59d95.5ac05",
+        "type": "split",
+        "z": "181fc47.135b93c",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 765,
+        "y": 190,
+        "wires": [
+            [
+                "555cac3f.8ecc44"
+            ]
+        ]
+    },
+    {
+        "id": "18ebe67e.c1f85a",
+        "type": "comment",
+        "z": "181fc47.135b93c",
+        "name": "ID: 010011",
+        "info": "",
+        "x": 65,
+        "y": 25,
+        "wires": []
+    },
+    {
+        "id": "9fb23223.fa3e9",
+        "type": "mbus-client",
+        "name": "Itron",
+        "clienttype": "tcp",
+        "tcpHost": "192.168.14.93",
+        "tcpPort": "2000",
+        "tcpTimeout": "4000",
+        "serialPort": "/dev/ttyUSB0",
+        "serialBaudrate": "2400",
+        "reconnectTimeout": "10000",
+        "autoScan": true,
+        "storeDevices": true,
+        "disableLogs": true
+    },
+    {
+        "id": "398df9e.4634a06",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "ws://192.168.15.22:8080",
+        "port": "8080",
+        "clientid": "",
+        "usetls": false,
+        "compatmode": false,
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    }
+]
